@@ -1,0 +1,5 @@
+{
+  "rewrites": [
+    { "source": "/", "destination": "/portfolio_enzo_tamietto.html" }
+  ]
+}
