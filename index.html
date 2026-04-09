@@ -1,0 +1,687 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Enzo Tamietto — Analista de Dados</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+:root{
+  --bg:#080c14;--surface:rgba(255,255,255,0.035);--surface2:rgba(255,255,255,0.06);
+  --border:rgba(255,255,255,0.07);--border2:rgba(255,255,255,0.12);
+  --text:#e8eaf0;--text2:#8b92a8;--text3:#565e75;
+  --accent:#00c8a0;--accent2:#0ea5e9;--accent3:#a78bfa;--health:#00a651;
+  --glow-g:rgba(0,200,160,0.18);--glow-b:rgba(14,165,233,0.15);
+  --glow-p:rgba(167,139,250,0.15);--glow-h:rgba(0,166,81,0.2);
+  --nav-h:64px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);line-height:1.6;overflow-x:hidden}
+body::before{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");pointer-events:none;z-index:0;opacity:.6}
+
+/* ORBS */
+.orb{position:fixed;border-radius:50%;filter:blur(80px);pointer-events:none;z-index:0}
+.orb-1{width:500px;height:500px;background:radial-gradient(circle,rgba(0,200,160,.12),transparent 70%);top:-100px;left:-100px}
+.orb-2{width:600px;height:600px;background:radial-gradient(circle,rgba(14,165,233,.1),transparent 70%);top:40vh;right:-200px}
+.orb-3{width:400px;height:400px;background:radial-gradient(circle,rgba(167,139,250,.1),transparent 70%);bottom:20vh;left:10vw}
+
+/* NAV */
+nav{position:fixed;top:0;left:0;right:0;height:var(--nav-h);padding:0 3rem;display:flex;align-items:center;justify-content:space-between;background:rgba(8,12,20,.85);backdrop-filter:blur(20px);border-bottom:.5px solid var(--border);z-index:200}
+.nav-logo{font-family:'Syne',sans-serif;font-weight:700;font-size:16px;color:var(--text);letter-spacing:-.02em;display:flex;align-items:center;gap:7px;text-decoration:none}
+.nav-logo .dot{color:var(--accent)}
+.nav-links{display:flex;gap:2rem;list-style:none}
+.nav-links a{font-size:13px;color:var(--text2);text-decoration:none;letter-spacing:.02em;transition:color .2s}
+.nav-links a:hover{color:var(--accent)}
+
+/* HAMBURGER */
+.nav-burger{display:none;flex-direction:column;gap:5px;cursor:pointer;padding:6px;border:none;background:none;z-index:201}
+.nav-burger span{display:block;width:22px;height:1.5px;background:var(--text2);border-radius:2px;transition:transform .3s,opacity .3s,background .2s}
+.nav-burger:hover span{background:var(--accent)}
+.nav-burger.open span:nth-child(1){transform:translateY(6.5px) rotate(45deg)}
+.nav-burger.open span:nth-child(2){opacity:0}
+.nav-burger.open span:nth-child(3){transform:translateY(-6.5px) rotate(-45deg)}
+
+/* MOBILE MENU DRAWER */
+.nav-drawer{display:none;position:fixed;inset:0;top:var(--nav-h);background:rgba(8,12,20,.97);backdrop-filter:blur(24px);z-index:199;flex-direction:column;align-items:center;justify-content:center;gap:2.5rem;opacity:0;pointer-events:none;transition:opacity .3s}
+.nav-drawer.open{opacity:1;pointer-events:all}
+.nav-drawer a{font-family:'Syne',sans-serif;font-size:28px;font-weight:700;color:var(--text2);text-decoration:none;letter-spacing:-.02em;transition:color .2s}
+.nav-drawer a:hover{color:var(--accent)}
+
+/* WRAPPER */
+.wrapper{position:relative;z-index:1;max-width:1100px;margin:0 auto;padding:0 2rem}
+
+/* HERO */
+.hero{min-height:100vh;display:flex;flex-direction:column;justify-content:center;padding:calc(var(--nav-h) + 4rem) 0 4rem}
+.hero-eyebrow{font-size:12px;letter-spacing:.15em;color:var(--accent);text-transform:uppercase;margin-bottom:1.2rem;display:flex;align-items:center;gap:10px}
+.hero-eyebrow::before{content:'';display:block;width:32px;height:1px;background:var(--accent)}
+.hero h1{font-family:'Syne',sans-serif;font-size:clamp(36px,8vw,86px);font-weight:800;line-height:1.02;letter-spacing:-.03em;color:#fff;margin-bottom:.5rem}
+.glow-name{background:linear-gradient(135deg,#fff 30%,var(--accent) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.hero-role{font-family:'Syne',sans-serif;font-size:clamp(16px,3vw,26px);font-weight:500;color:var(--text2);margin-bottom:1.4rem;letter-spacing:-.01em}
+.hero-desc{font-size:15px;color:var(--text2);max-width:520px;line-height:1.75;margin-bottom:2rem}
+.hero-actions{display:flex;gap:12px;flex-wrap:wrap}
+.btn-primary{display:inline-flex;align-items:center;gap:8px;padding:12px 24px;border-radius:8px;background:var(--accent);color:#06110d;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:500;text-decoration:none;box-shadow:0 0 24px rgba(0,200,160,.35),0 0 60px rgba(0,200,160,.12);transition:box-shadow .3s,transform .2s}
+.btn-primary:hover{box-shadow:0 0 36px rgba(0,200,160,.55),0 0 80px rgba(0,200,160,.2);transform:translateY(-1px)}
+.btn-ghost{display:inline-flex;align-items:center;gap:8px;padding:12px 24px;border-radius:8px;border:.5px solid var(--border2);color:var(--text2);font-family:'DM Sans',sans-serif;font-size:14px;text-decoration:none;transition:border-color .2s,color .2s}
+.btn-ghost:hover{border-color:var(--accent);color:var(--accent)}
+
+/* SECTIONS */
+section{padding:5rem 0}
+.section-label{font-size:11px;letter-spacing:.18em;color:var(--accent);text-transform:uppercase;margin-bottom:.8rem;display:flex;align-items:center;gap:10px}
+.section-label::before{content:'';display:block;width:24px;height:1px;background:var(--accent)}
+.section-title{font-family:'Syne',sans-serif;font-size:clamp(24px,4vw,44px);font-weight:700;letter-spacing:-.02em;color:#fff;margin-bottom:2.5rem;line-height:1.15}
+
+/* METRICS */
+.metrics-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-bottom:1.5rem}
+.metric-card{background:var(--surface);border:.5px solid var(--border);border-radius:12px;padding:1rem 1.2rem;transition:border-color .2s,box-shadow .2s}
+.metric-card:hover{border-color:var(--border2);box-shadow:0 0 24px var(--glow-g)}
+.metric-card.blue:hover{box-shadow:0 0 24px var(--glow-b)}
+.metric-card.purple:hover{box-shadow:0 0 24px var(--glow-p)}
+.metric-label{font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.1em;margin-bottom:5px}
+.metric-value{font-family:'Syne',sans-serif;font-size:24px;font-weight:700;color:#fff}
+.metric-delta{font-size:11px;color:var(--accent);margin-top:3px}
+.metric-delta.neg{color:#f87171}
+
+/* CHARTS */
+.charts-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+.chart-card{background:var(--surface);border:.5px solid var(--border);border-radius:16px;padding:1.25rem}
+.chart-card.full{grid-column:1/-1}
+.chart-header{margin-bottom:1rem}
+.chart-title{font-family:'Syne',sans-serif;font-size:14px;font-weight:600;color:#fff}
+.chart-sub{font-size:11px;color:var(--text3);margin-top:3px}
+.legend{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:10px}
+.legend-item{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text2)}
+.legend-dot{width:7px;height:7px;border-radius:2px;flex-shrink:0}
+
+/* PROJECTS */
+.projects-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+.proj-card{background:var(--surface);border:.5px solid var(--border);border-radius:16px;padding:1.5rem;transition:border-color .3s,box-shadow .3s,transform .2s;display:flex;flex-direction:column;cursor:pointer}
+.proj-card:hover{border-color:var(--border2);transform:translateY(-3px)}
+.proj-card.health:hover{border-color:rgba(0,166,81,.5);box-shadow:0 0 40px var(--glow-h)}
+.proj-card.sales:hover{box-shadow:0 0 40px var(--glow-b);border-color:rgba(14,165,233,.4)}
+.proj-card.rh:hover{box-shadow:0 0 40px var(--glow-p);border-color:rgba(167,139,250,.4)}
+.proj-card.mkt:hover{box-shadow:0 0 40px var(--glow-g);border-color:rgba(0,200,160,.4)}
+.proj-icon{width:42px;height:42px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;margin-bottom:1rem}
+.proj-icon.g{background:rgba(0,200,160,.12)}
+.proj-icon.b{background:rgba(14,165,233,.12)}
+.proj-icon.p{background:rgba(167,139,250,.12)}
+.proj-icon.h{background:rgba(0,166,81,.12)}
+.proj-tag{display:inline-block;font-size:10px;letter-spacing:.1em;text-transform:uppercase;padding:3px 10px;border-radius:20px;margin-bottom:8px;font-weight:500}
+.tag-green{background:rgba(0,200,160,.12);color:var(--accent)}
+.tag-blue{background:rgba(14,165,233,.12);color:var(--accent2)}
+.tag-purple{background:rgba(167,139,250,.12);color:var(--accent3)}
+.tag-health{background:rgba(0,166,81,.12);color:var(--health)}
+.proj-title{font-family:'Syne',sans-serif;font-size:16px;font-weight:600;color:#fff;margin-bottom:7px}
+.proj-desc{font-size:13px;color:var(--text2);line-height:1.6;flex:1}
+.proj-tools{display:flex;flex-wrap:wrap;gap:5px;margin-top:1rem}
+.tool{font-size:11px;padding:3px 9px;border-radius:20px;border:.5px solid var(--border2);color:var(--text3)}
+.proj-result{margin-top:.8rem;padding:9px 12px;border-radius:8px;background:rgba(255,255,255,.03);border:.5px solid var(--border);font-size:12px;color:var(--text2)}
+.proj-result strong{color:var(--accent);font-weight:500}
+.open-hint{display:inline-flex;align-items:center;gap:6px;font-size:11px;color:var(--text3);margin-top:.8rem;letter-spacing:.05em;text-transform:uppercase;transition:color .2s}
+.proj-card:hover .open-hint{color:var(--accent)}
+.open-hint svg{width:11px;height:11px}
+
+/* SKILL WHEELS */
+.skills-wheel-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px}
+.skill-wheel-card{background:var(--surface);border:.5px solid var(--border);border-radius:20px;padding:1.6rem 1.2rem 1.2rem;display:flex;flex-direction:column;align-items:center;transition:border-color .3s}
+.skill-wheel-card:hover{border-color:var(--border2)}
+.swc-ring{position:relative;width:100px;height:100px;margin-bottom:.8rem;flex-shrink:0}
+.swc-svg{width:100%;height:100%}
+.swc-arc{transition:stroke-dashoffset 1.2s cubic-bezier(.4,0,.2,1)}
+.swc-center{position:absolute;inset:0;display:flex;align-items:center;justify-content:center}
+.swc-icon{font-size:26px;line-height:1}
+.swc-label{font-family:'Syne',sans-serif;font-size:11px;font-weight:600;color:var(--text2);text-align:center;margin-bottom:.8rem;letter-spacing:.04em;text-transform:uppercase}
+.swc-ticker{width:100%;height:26px;overflow:hidden}
+.swc-ticker-inner{display:flex;flex-direction:column;align-items:center;transition:transform .5s cubic-bezier(.4,0,.2,1)}
+.swc-ticker-inner span{height:26px;line-height:26px;font-size:12px;color:#fff;font-weight:500;white-space:nowrap;text-align:center;width:100%}
+.swc-dots{display:flex;gap:4px;margin-top:8px;justify-content:center}
+.swc-dot{width:4px;height:4px;border-radius:50%;background:rgba(255,255,255,.15);transition:background .3s,transform .3s}
+.swc-dot.active{transform:scale(1.5)}
+
+/* CONTACT */
+.contact-grid{display:grid;grid-template-columns:1fr 1fr;gap:32px;align-items:start}
+.contact-info{display:flex;flex-direction:column;gap:14px}
+.contact-item{display:flex;align-items:center;gap:12px}
+.contact-icon{width:36px;height:36px;border-radius:8px;background:var(--surface2);display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0}
+.contact-detail-label{font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.08em}
+.contact-detail-val{font-size:14px;color:var(--text);margin-top:1px}
+.idiomas-card{background:var(--surface);border:.5px solid var(--border);border-radius:16px;padding:1.25rem}
+.skill-group-title{font-family:'Syne',sans-serif;font-size:13px;font-weight:600;color:var(--text2);margin-bottom:1rem;letter-spacing:.05em;text-transform:uppercase}
+.idioma{display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:.5px solid var(--border)}
+.idioma:last-child{border-bottom:none}
+.idioma-name{font-size:14px;color:var(--text)}
+.idioma-level{font-size:11px;color:var(--accent);background:rgba(0,200,160,.1);padding:3px 10px;border-radius:20px}
+.idioma-level.mid{color:var(--accent2);background:rgba(14,165,233,.1)}
+
+/* FOOTER */
+footer{border-top:.5px solid var(--border);padding:1.5rem 0;text-align:center;font-size:12px;color:var(--text3)}
+
+/* ANIMATIONS */
+@keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+.hero>*{animation:fadeUp .7s ease both}
+.hero>*:nth-child(1){animation-delay:.05s}
+.hero>*:nth-child(2){animation-delay:.15s}
+.hero>*:nth-child(3){animation-delay:.22s}
+.hero>*:nth-child(4){animation-delay:.3s}
+.hero>*:nth-child(5){animation-delay:.38s}
+
+/* MODAL */
+.modal-overlay{position:fixed;inset:0;z-index:999;background:rgba(4,6,12,.92);backdrop-filter:blur(14px);display:flex;align-items:center;justify-content:center;padding:1rem;opacity:0;pointer-events:none;transition:opacity .35s ease}
+.modal-overlay.open{opacity:1;pointer-events:all}
+.modal-box{background:#0d1220;border:.5px solid rgba(255,255,255,.1);border-radius:20px;width:100%;max-width:960px;max-height:92vh;overflow-y:auto;padding:2rem;transform:translateY(32px) scale(.97);transition:transform .4s cubic-bezier(.16,1,.3,1),opacity .35s ease;opacity:0;scrollbar-width:thin;scrollbar-color:rgba(255,255,255,.1) transparent;position:relative}
+.modal-overlay.open .modal-box{transform:translateY(0) scale(1);opacity:1}
+.modal-close{position:absolute;top:1.2rem;right:1.2rem;width:34px;height:34px;border-radius:8px;background:rgba(255,255,255,.06);border:.5px solid var(--border2);color:var(--text2);font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .2s,color .2s}
+.modal-close:hover{background:rgba(255,255,255,.12);color:#fff}
+.modal-header{margin-bottom:1.5rem;padding-right:3rem}
+.modal-tag{display:inline-block;font-size:10px;letter-spacing:.12em;text-transform:uppercase;padding:3px 10px;border-radius:20px;font-weight:500;margin-bottom:8px}
+.modal-title{font-family:'Syne',sans-serif;font-size:clamp(18px,3vw,24px);font-weight:700;color:#fff;margin-bottom:5px}
+.modal-desc{font-size:13px;color:var(--text2);line-height:1.65}
+.modal-metrics{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-bottom:1.5rem}
+.modal-metric{background:rgba(255,255,255,.04);border:.5px solid var(--border);border-radius:10px;padding:.9rem 1rem}
+.modal-metric .metric-label{font-size:10px}
+.modal-metric .metric-value{font-size:20px}
+.modal-charts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.modal-chart-card{background:rgba(255,255,255,.03);border:.5px solid var(--border);border-radius:14px;padding:1rem}
+.modal-chart-card.full{grid-column:1/-1}
+.modal-chart-title{font-family:'Syne',sans-serif;font-size:13px;font-weight:600;color:#fff;margin-bottom:3px}
+.modal-chart-sub{font-size:11px;color:var(--text3);margin-bottom:8px}
+
+/* ═══════════ RESPONSIVE — TABLET (≤900px) ═══════════ */
+@media(max-width:900px){
+  .skills-wheel-grid{grid-template-columns:repeat(2,1fr)}
+  .modal-metrics{grid-template-columns:repeat(2,1fr)}
+}
+
+/* ═══════════ RESPONSIVE — MOBILE (≤768px) ═══════════ */
+@media(max-width:768px){
+  nav{padding:0 1.2rem}
+  .nav-links{display:none}
+  .nav-burger{display:flex}
+  .nav-drawer{display:flex}
+  .wrapper{padding:0 1rem}
+
+  section{padding:3.5rem 0}
+  .section-title{margin-bottom:1.8rem}
+
+  /* hero */
+  .hero{padding:calc(var(--nav-h) + 2.5rem) 0 3rem}
+  .hero h1{font-size:clamp(34px,10vw,56px)}
+  .hero-role{font-size:clamp(15px,4vw,20px)}
+  .hero-desc{font-size:14px}
+  .btn-primary,.btn-ghost{padding:11px 20px;font-size:13px}
+
+  /* metrics 2 cols */
+  .metrics-grid{grid-template-columns:repeat(2,1fr);gap:10px}
+  .metric-value{font-size:20px}
+
+  /* charts 1 col */
+  .charts-grid{grid-template-columns:1fr}
+  .chart-card.full{grid-column:1}
+
+  /* projects 1 col */
+  .projects-grid{grid-template-columns:1fr}
+
+  /* wheels 2 cols */
+  .skills-wheel-grid{grid-template-columns:repeat(2,1fr)}
+  .swc-ring{width:86px;height:86px}
+  .swc-icon{font-size:22px}
+
+  /* contact 1 col */
+  .contact-grid{grid-template-columns:1fr;gap:20px}
+
+  /* modal */
+  .modal-box{padding:1.4rem;border-radius:16px}
+  .modal-header{padding-right:2.5rem}
+  .modal-metrics{grid-template-columns:repeat(2,1fr);gap:8px}
+  .modal-metric{padding:.7rem .8rem}
+  .modal-metric .metric-value{font-size:18px}
+  .modal-charts{grid-template-columns:1fr}
+  .modal-chart-card.full{grid-column:1}
+}
+
+/* ═══════════ RESPONSIVE — SMALL MOBILE (≤420px) ═══════════ */
+@media(max-width:420px){
+  .hero h1{font-size:clamp(30px,11vw,44px)}
+  .metrics-grid{grid-template-columns:repeat(2,1fr)}
+  .skills-wheel-grid{grid-template-columns:repeat(2,1fr)}
+  .swc-label{font-size:10px}
+  .swc-ticker-inner span{font-size:11px}
+  .hero-actions{flex-direction:column}
+  .btn-primary,.btn-ghost{width:100%;justify-content:center}
+}
+</style>
+</head>
+<body>
+
+<div class="orb orb-1"></div>
+<div class="orb orb-2"></div>
+<div class="orb orb-3"></div>
+
+<nav>
+  <a href="#" class="nav-logo">
+    <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+      <rect x="1" y="9" width="3" height="8" rx="1" fill="#00c8a0"/>
+      <rect x="6" y="5" width="3" height="12" rx="1" fill="#00c8a0" opacity=".7"/>
+      <rect x="11" y="1" width="3" height="16" rx="1" fill="#00c8a0" opacity=".45"/>
+      <path d="M2.5 8.5L7.5 4.5L12.5 1" stroke="#00c8a0" stroke-width="1.2" stroke-linecap="round" opacity=".6"/>
+    </svg>
+    <span>Enzo Fantin</span><span class="dot">.</span>
+  </a>
+  <ul class="nav-links">
+    <li><a href="#dashboard">Dashboard</a></li>
+    <li><a href="#projetos">Projetos</a></li>
+    <li><a href="#habilidades">Habilidades</a></li>
+    <li><a href="#contato">Contato</a></li>
+  </ul>
+  <button class="nav-burger" id="burger" aria-label="Menu">
+    <span></span><span></span><span></span>
+  </button>
+</nav>
+
+<div class="nav-drawer" id="drawer">
+  <a href="#dashboard" onclick="closeDrawer()">Dashboard</a>
+  <a href="#projetos" onclick="closeDrawer()">Projetos</a>
+  <a href="#habilidades" onclick="closeDrawer()">Habilidades</a>
+  <a href="#contato" onclick="closeDrawer()">Contato</a>
+</div>
+
+<div class="wrapper">
+  <section class="hero">
+    <div class="hero-eyebrow">Portfólio · Analista de Dados</div>
+    <h1><span class="glow-name">Enzo Fantin</span><br>Tamietto</h1>
+    <div class="hero-role">Dados → Decisões → Resultado</div>
+    <p class="hero-desc">Especialista em transformar volumes complexos de informação em insights estratégicos acionáveis. Dashboards, BI, automação e análise orientada a negócio.</p>
+    <div class="hero-actions">
+      <a href="#projetos" class="btn-primary">Ver projetos ↓</a>
+      <a href="mailto:enzotamietto@gmail.com" class="btn-ghost">Entrar em contato</a>
+    </div>
+  </section>
+
+  <section id="dashboard">
+    <div class="section-label">Overview</div>
+    <div class="section-title">Dashboard de<br>desempenho</div>
+    <div class="metrics-grid">
+      <div class="metric-card"><div class="metric-label">Impressões totais</div><div class="metric-value">1.24M</div><div class="metric-delta">↑ 18% vs mês ant.</div></div>
+      <div class="metric-card blue"><div class="metric-label">Cliques</div><div class="metric-value">38.5K</div><div class="metric-delta">↑ 12%</div></div>
+      <div class="metric-card purple"><div class="metric-label">ROI médio</div><div class="metric-value">3.2×</div><div class="metric-delta">↑ 0.4 pts</div></div>
+      <div class="metric-card"><div class="metric-label">Conversões</div><div class="metric-value">2.1K</div><div class="metric-delta">↑ 9%</div></div>
+    </div>
+    <div class="charts-grid">
+      <div class="chart-card">
+        <div class="chart-header"><div class="chart-title">Desempenho de campanhas</div><div class="chart-sub">Cliques e conversões — Jan a Jun</div></div>
+        <div class="legend">
+          <div class="legend-item"><div class="legend-dot" style="background:#00c8a0"></div>Cliques (K)</div>
+          <div class="legend-item"><div class="legend-dot" style="background:#0ea5e9"></div>Conversões</div>
+        </div>
+        <div style="position:relative;height:200px"><canvas id="lineChart"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-header"><div class="chart-title">Canais de aquisição</div><div class="chart-sub">Distribuição de leads por canal</div></div>
+        <div class="legend">
+          <div class="legend-item"><div class="legend-dot" style="background:#00c8a0"></div>Google Ads 38%</div>
+          <div class="legend-item"><div class="legend-dot" style="background:#0ea5e9"></div>Meta Ads 27%</div>
+          <div class="legend-item"><div class="legend-dot" style="background:#a78bfa"></div>Orgânico 20%</div>
+          <div class="legend-item"><div class="legend-dot" style="background:#f59e0b"></div>Email 15%</div>
+        </div>
+        <div style="position:relative;height:200px"><canvas id="donutChart"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-header"><div class="chart-title" style="color:#00a651">Indicadores — Setor Assistencial</div><div class="chart-sub">Taxa de utilização por especialidade (2024)</div></div>
+        <div class="legend">
+          <div class="legend-item"><div class="legend-dot" style="background:#00a651"></div>Realizado (K)</div>
+          <div class="legend-item"><div class="legend-dot" style="background:#00c8a0"></div>Meta (K)</div>
+        </div>
+        <div style="position:relative;height:200px"><canvas id="healthChart"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-header"><div class="chart-title">ROI por campanha</div><div class="chart-sub">Retorno sobre investimento — Top 5</div></div>
+        <div class="legend"><div class="legend-item"><div class="legend-dot" style="background:#a78bfa"></div>ROI (×)</div></div>
+        <div style="position:relative;height:200px"><canvas id="roiChart"></canvas></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="projetos">
+    <div class="section-label">Portfólio</div>
+    <div class="section-title">Projetos em<br>destaque</div>
+    <div class="projects-grid">
+      <div class="proj-card health" onclick="openModal('saude')">
+        <div class="proj-icon h">🏥</div>
+        <span class="proj-tag tag-health">Saúde · BI</span>
+        <div class="proj-title">Dashboard de indicadores clínicos — Setor Saúde</div>
+        <div class="proj-desc">Painel executivo para monitoramento de KPIs assistenciais: taxa de ocupação hospitalar, tempo médio de espera por especialidade, sinistralidade e NPS de beneficiários. Visualização em tempo real com drill-down por regional.</div>
+        <div class="proj-tools"><span class="tool">Power BI</span><span class="tool">SQL</span><span class="tool">Python</span><span class="tool">DAX</span></div>
+        <div class="proj-result">Resultado: <strong>redução de 22% no tempo de geração de relatórios gerenciais</strong> e visibilidade unificada de indicadores para 3 regionais.</div>
+        <div class="open-hint"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M8 3h5v5M13 3l-7 7M6 4H3v9h9v-3"/></svg>Ver dashboard completo</div>
+      </div>
+      <div class="proj-card sales" onclick="openModal('vendas')">
+        <div class="proj-icon b">📈</div>
+        <span class="proj-tag tag-blue">Vendas · Analytics</span>
+        <div class="proj-title">Análise de funil de vendas e previsão de receita</div>
+        <div class="proj-desc">Pipeline de dados integrado ao CRM que consolida todas as etapas do funil comercial. Modelo preditivo de receita com base em sazonalidade e histórico, alertas automáticos de churn e score de probabilidade de fechamento por cliente.</div>
+        <div class="proj-tools"><span class="tool">Python (Pandas)</span><span class="tool">Looker Studio</span><span class="tool">MySQL</span><span class="tool">Google Sheets</span></div>
+        <div class="proj-result">Resultado: <strong>previsão de receita com 89% de acurácia</strong> e identificação de R$180K em oportunidades não trabalhadas.</div>
+        <div class="open-hint"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M8 3h5v5M13 3l-7 7M6 4H3v9h9v-3"/></svg>Ver dashboard completo</div>
+      </div>
+      <div class="proj-card rh" onclick="openModal('rh')">
+        <div class="proj-icon p">👥</div>
+        <span class="proj-tag tag-purple">Recursos Humanos · People Analytics</span>
+        <div class="proj-title">People Analytics — Turnover e engajamento</div>
+        <div class="proj-desc">Dashboard de gestão de pessoas com análise de turnover por área, tempo médio de permanência, índice de absenteísmo e correlação com pesquisas de clima. Mapa de calor por departamento para priorização de ações de retenção.</div>
+        <div class="proj-tools"><span class="tool">Power BI</span><span class="tool">Python</span><span class="tool">SQL</span><span class="tool">Apps Script</span></div>
+        <div class="proj-result">Resultado: <strong>redução de 15% no turnover</strong> após implementação de alertas preventivos baseados nos dados.</div>
+        <div class="open-hint"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M8 3h5v5M13 3l-7 7M6 4H3v9h9v-3"/></svg>Ver dashboard completo</div>
+      </div>
+      <div class="proj-card mkt" onclick="openModal('mkt')">
+        <div class="proj-icon g">⚡</div>
+        <span class="proj-tag tag-green">Marketing · Automação</span>
+        <div class="proj-title">Automação de relatórios e geração de insights</div>
+        <div class="proj-desc">Pipeline automatizado que consolida dados de Google Ads, Meta Ads e Analytics em um único repositório. Geração de relatórios gerenciais semanais com envio automático por email. Identificação de anomalias de performance com alertas em tempo real.</div>
+        <div class="proj-tools"><span class="tool">Python</span><span class="tool">Google Apps Script</span><span class="tool">Looker Studio</span><span class="tool">BigQuery</span></div>
+        <div class="proj-result">Resultado: <strong>economia de 12h semanais</strong> de trabalho manual e redução de erros nos relatórios para 0%.</div>
+        <div class="open-hint"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M8 3h5v5M13 3l-7 7M6 4H3v9h9v-3"/></svg>Ver dashboard completo</div>
+      </div>
+    </div>
+  </section>
+
+  <section id="habilidades">
+    <div class="section-label">Stack técnico</div>
+    <div class="section-title">Habilidades</div>
+    <div class="skills-wheel-grid">
+      <div class="skill-wheel-card">
+        <div class="swc-ring">
+          <svg class="swc-svg" viewBox="0 0 100 100">
+            <circle cx="50" cy="50" r="44" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="3"/>
+            <circle class="swc-arc" cx="50" cy="50" r="44" fill="none" stroke="#00c8a0" stroke-width="3" stroke-dasharray="276.46" stroke-dashoffset="276.46" stroke-linecap="round" transform="rotate(-90 50 50)"/>
+          </svg>
+          <div class="swc-center"><div class="swc-icon">📊</div></div>
+        </div>
+        <div class="swc-label">Visualização & BI</div>
+        <div class="swc-ticker"><div class="swc-ticker-inner" id="ticker-bi"><span>Power BI</span><span>DAX</span><span>Looker Studio</span><span>Excel avançado</span></div></div>
+        <div class="swc-dots" id="dots-bi" data-color="#00c8a0" data-count="4"></div>
+      </div>
+      <div class="skill-wheel-card">
+        <div class="swc-ring">
+          <svg class="swc-svg" viewBox="0 0 100 100">
+            <circle cx="50" cy="50" r="44" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="3"/>
+            <circle class="swc-arc" cx="50" cy="50" r="44" fill="none" stroke="#0ea5e9" stroke-width="3" stroke-dasharray="276.46" stroke-dashoffset="276.46" stroke-linecap="round" transform="rotate(-90 50 50)"/>
+          </svg>
+          <div class="swc-center"><div class="swc-icon">💻</div></div>
+        </div>
+        <div class="swc-label">Programação & Dados</div>
+        <div class="swc-ticker"><div class="swc-ticker-inner" id="ticker-code"><span>Python</span><span>Pandas / NumPy</span><span>SQL</span><span>MySQL</span><span>JavaScript</span><span>HTML / CSS</span></div></div>
+        <div class="swc-dots" id="dots-code" data-color="#0ea5e9" data-count="6"></div>
+      </div>
+      <div class="skill-wheel-card">
+        <div class="swc-ring">
+          <svg class="swc-svg" viewBox="0 0 100 100">
+            <circle cx="50" cy="50" r="44" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="3"/>
+            <circle class="swc-arc" cx="50" cy="50" r="44" fill="none" stroke="#a78bfa" stroke-width="3" stroke-dasharray="276.46" stroke-dashoffset="276.46" stroke-linecap="round" transform="rotate(-90 50 50)"/>
+          </svg>
+          <div class="swc-center"><div class="swc-icon">🎨</div></div>
+        </div>
+        <div class="swc-label">Design & UX</div>
+        <div class="swc-ticker"><div class="swc-ticker-inner" id="ticker-design"><span>Figma</span><span>Photoshop</span><span>Illustrator</span><span>Data-driven Design</span></div></div>
+        <div class="swc-dots" id="dots-design" data-color="#a78bfa" data-count="4"></div>
+      </div>
+      <div class="skill-wheel-card">
+        <div class="swc-ring">
+          <svg class="swc-svg" viewBox="0 0 100 100">
+            <circle cx="50" cy="50" r="44" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="3"/>
+            <circle class="swc-arc" cx="50" cy="50" r="44" fill="none" stroke="#f59e0b" stroke-width="3" stroke-dasharray="276.46" stroke-dashoffset="276.46" stroke-linecap="round" transform="rotate(-90 50 50)"/>
+          </svg>
+          <div class="swc-center"><div class="swc-icon">⚡</div></div>
+        </div>
+        <div class="swc-label">Automação & Integração</div>
+        <div class="swc-ticker"><div class="swc-ticker-inner" id="ticker-auto"><span>Google Apps Script</span><span>BigQuery</span><span>Automação de processos</span><span>Integração de sistemas</span></div></div>
+        <div class="swc-dots" id="dots-auto" data-color="#f59e0b" data-count="4"></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="contato">
+    <div class="section-label">Fale comigo</div>
+    <div class="section-title">Contato</div>
+    <div class="contact-grid">
+      <div class="contact-info">
+        <div class="contact-item"><div class="contact-icon">✉️</div><div><div class="contact-detail-label">Email</div><div class="contact-detail-val">enzotamietto@gmail.com</div></div></div>
+        <div class="contact-item"><div class="contact-icon">📱</div><div><div class="contact-detail-label">Telefone</div><div class="contact-detail-val">(19) 9977-54491</div></div></div>
+        <div class="contact-item"><div class="contact-icon">📍</div><div><div class="contact-detail-label">Localização</div><div class="contact-detail-val">Campinas, SP — Brasil</div></div></div>
+        <div class="contact-item"><div class="contact-icon">🎓</div><div><div class="contact-detail-label">Formação</div><div class="contact-detail-val">Engenharia de Software · Estácio de Sá</div></div></div>
+      </div>
+      <div class="idiomas-card">
+        <div class="skill-group-title">Idiomas</div>
+        <div class="idioma"><span class="idioma-name">Português</span><span class="idioma-level">Nativo</span></div>
+        <div class="idioma"><span class="idioma-name">Inglês</span><span class="idioma-level">Fluente</span></div>
+        <div class="idioma"><span class="idioma-name">Espanhol</span><span class="idioma-level mid">Intermediário</span></div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<footer><div class="wrapper">© 2025 Enzo Fantin Tamietto · Analista de Dados · Campinas, SP</div></footer>
+
+<!-- MODAIS -->
+<div class="modal-overlay" id="modal-saude" onclick="if(event.target===this)closeModal('saude')">
+  <div class="modal-box">
+    <button class="modal-close" onclick="closeModal('saude')">✕</button>
+    <div class="modal-header">
+      <div class="modal-tag tag-health">Saúde · BI</div>
+      <div class="modal-title">Dashboard — Indicadores Clínicos · Setor Saúde</div>
+      <div class="modal-desc">Painel executivo com KPIs assistenciais em tempo real: ocupação, sinistralidade, tempo de espera por especialidade e NPS de beneficiários — com drill-down por regional.</div>
+    </div>
+    <div class="modal-metrics">
+      <div class="modal-metric"><div class="metric-label">Ocupação hospitalar</div><div class="metric-value" style="color:#00a651">78%</div><div class="metric-delta">↑ 4 pts</div></div>
+      <div class="modal-metric"><div class="metric-label">Sinistralidade</div><div class="metric-value">68.2%</div><div class="metric-delta neg">↑ 1.2 pts</div></div>
+      <div class="modal-metric"><div class="metric-label">Tempo médio espera</div><div class="metric-value">14 min</div><div class="metric-delta">↓ 3 min</div></div>
+      <div class="modal-metric"><div class="metric-label">NPS beneficiários</div><div class="metric-value" style="color:#00a651">72</div><div class="metric-delta">↑ 5 pts</div></div>
+    </div>
+    <div class="modal-charts">
+      <div class="modal-chart-card">
+        <div class="modal-chart-title">Consultas vs Meta por especialidade</div>
+        <div class="modal-chart-sub">Realizado (K) vs Meta mensal (K)</div>
+        <div class="legend" style="margin-bottom:8px"><div class="legend-item"><div class="legend-dot" style="background:#00a651"></div>Realizado</div><div class="legend-item"><div class="legend-dot" style="background:#00c8a0"></div>Meta</div></div>
+        <div style="position:relative;height:180px"><canvas id="m-saude-bar"></canvas></div>
+      </div>
+      <div class="modal-chart-card">
+        <div class="modal-chart-title">Sinistralidade mensal</div>
+        <div class="modal-chart-sub">Evolução % — Jan a Jun 2024</div>
+        <div class="legend" style="margin-bottom:8px"><div class="legend-item"><div class="legend-dot" style="background:#00a651"></div>Sinistralidade</div><div class="legend-item"><div class="legend-dot" style="background:#f87171"></div>Limite</div></div>
+        <div style="position:relative;height:180px"><canvas id="m-saude-line"></canvas></div>
+      </div>
+      <div class="modal-chart-card full">
+        <div class="modal-chart-title">NPS por regional — histórico trimestral</div>
+        <div class="modal-chart-sub">Campinas · Sorocaba · São Paulo · Interior</div>
+        <div class="legend" style="margin-bottom:8px"><div class="legend-item"><div class="legend-dot" style="background:#00a651"></div>Campinas</div><div class="legend-item"><div class="legend-dot" style="background:#00c8a0"></div>Sorocaba</div><div class="legend-item"><div class="legend-dot" style="background:#a78bfa"></div>São Paulo</div><div class="legend-item"><div class="legend-dot" style="background:#f59e0b"></div>Interior</div></div>
+        <div style="position:relative;height:160px"><canvas id="m-saude-nps"></canvas></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-vendas" onclick="if(event.target===this)closeModal('vendas')">
+  <div class="modal-box">
+    <button class="modal-close" onclick="closeModal('vendas')">✕</button>
+    <div class="modal-header">
+      <div class="modal-tag tag-blue">Vendas · Analytics</div>
+      <div class="modal-title">Dashboard — Funil de Vendas & Previsão de Receita</div>
+      <div class="modal-desc">Pipeline integrado ao CRM com modelo preditivo de receita, score de fechamento por cliente, alertas de churn e monitoramento diário de todas as etapas do funil comercial.</div>
+    </div>
+    <div class="modal-metrics">
+      <div class="modal-metric"><div class="metric-label">Receita realizada</div><div class="metric-value" style="color:#0ea5e9">R$2.4M</div><div class="metric-delta">↑ 18% vs meta</div></div>
+      <div class="modal-metric"><div class="metric-label">Taxa conversão</div><div class="metric-value">24.7%</div><div class="metric-delta">↑ 3.1 pts</div></div>
+      <div class="modal-metric"><div class="metric-label">Ticket médio</div><div class="metric-value">R$8.2K</div><div class="metric-delta">↑ 6%</div></div>
+      <div class="modal-metric"><div class="metric-label">Acurácia forecast</div><div class="metric-value" style="color:#0ea5e9">89%</div><div class="metric-delta">modelo preditivo</div></div>
+    </div>
+    <div class="modal-charts">
+      <div class="modal-chart-card full">
+        <div class="modal-chart-title">Receita realizada vs prevista — Jan a Dez</div>
+        <div class="modal-chart-sub">Modelo preditivo baseado em sazonalidade e histórico</div>
+        <div class="legend" style="margin-bottom:8px"><div class="legend-item"><div class="legend-dot" style="background:#0ea5e9"></div>Realizado</div><div class="legend-item"><div class="legend-dot" style="background:#a78bfa"></div>Previsto</div></div>
+        <div style="position:relative;height:170px"><canvas id="m-vendas-line"></canvas></div>
+      </div>
+      <div class="modal-chart-card">
+        <div class="modal-chart-title">Funil de conversão</div>
+        <div class="modal-chart-sub">Leads → Fechamentos</div>
+        <div style="position:relative;height:180px"><canvas id="m-vendas-funil"></canvas></div>
+      </div>
+      <div class="modal-chart-card">
+        <div class="modal-chart-title">Receita por segmento</div>
+        <div class="modal-chart-sub">Distribuição % por vertical</div>
+        <div class="legend" style="margin-bottom:8px"><div class="legend-item"><div class="legend-dot" style="background:#0ea5e9"></div>Enterprise 42%</div><div class="legend-item"><div class="legend-dot" style="background:#a78bfa"></div>Mid 31%</div><div class="legend-item"><div class="legend-dot" style="background:#00c8a0"></div>SMB 27%</div></div>
+        <div style="position:relative;height:180px"><canvas id="m-vendas-donut"></canvas></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-rh" onclick="if(event.target===this)closeModal('rh')">
+  <div class="modal-box">
+    <button class="modal-close" onclick="closeModal('rh')">✕</button>
+    <div class="modal-header">
+      <div class="modal-tag tag-purple">Recursos Humanos · People Analytics</div>
+      <div class="modal-title">Dashboard — People Analytics · Turnover & Engajamento</div>
+      <div class="modal-desc">Gestão de pessoas orientada a dados: turnover por área, absenteísmo, tempo de permanência e correlação com pesquisas de clima. Alertas preventivos de risco de saída por colaborador.</div>
+    </div>
+    <div class="modal-metrics">
+      <div class="modal-metric"><div class="metric-label">Turnover anual</div><div class="metric-value" style="color:#a78bfa">12.4%</div><div class="metric-delta">↓ 15% pós projeto</div></div>
+      <div class="modal-metric"><div class="metric-label">Absenteísmo</div><div class="metric-value">3.1%</div><div class="metric-delta neg">↑ 0.4 pts</div></div>
+      <div class="modal-metric"><div class="metric-label">Permanência média</div><div class="metric-value">2.8 a</div><div class="metric-delta">↑ 4 meses</div></div>
+      <div class="modal-metric"><div class="metric-label">eNPS (clima)</div><div class="metric-value" style="color:#a78bfa">58</div><div class="metric-delta">↑ 12 pts</div></div>
+    </div>
+    <div class="modal-charts">
+      <div class="modal-chart-card">
+        <div class="modal-chart-title">Turnover por área</div>
+        <div class="modal-chart-sub">Taxa % por departamento</div>
+        <div style="position:relative;height:180px"><canvas id="m-rh-turnover"></canvas></div>
+      </div>
+      <div class="modal-chart-card">
+        <div class="modal-chart-title">eNPS por trimestre</div>
+        <div class="modal-chart-sub">Índice de clima organizacional</div>
+        <div class="legend" style="margin-bottom:8px"><div class="legend-item"><div class="legend-dot" style="background:#a78bfa"></div>eNPS</div><div class="legend-item"><div class="legend-dot" style="background:#565e75"></div>Benchmark</div></div>
+        <div style="position:relative;height:180px"><canvas id="m-rh-enps"></canvas></div>
+      </div>
+      <div class="modal-chart-card full">
+        <div class="modal-chart-title">Absenteísmo — 2023 vs 2024 (%)</div>
+        <div class="modal-chart-sub">Comparativo mensal</div>
+        <div class="legend" style="margin-bottom:8px"><div class="legend-item"><div class="legend-dot" style="background:#565e75"></div>2023</div><div class="legend-item"><div class="legend-dot" style="background:#a78bfa"></div>2024</div></div>
+        <div style="position:relative;height:150px"><canvas id="m-rh-abs"></canvas></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-mkt" onclick="if(event.target===this)closeModal('mkt')">
+  <div class="modal-box">
+    <button class="modal-close" onclick="closeModal('mkt')">✕</button>
+    <div class="modal-header">
+      <div class="modal-tag tag-green">Marketing · Automação</div>
+      <div class="modal-title">Dashboard — Automação de Relatórios & Performance</div>
+      <div class="modal-desc">Pipeline automatizado que consolida Google Ads, Meta Ads e Analytics. Geração de relatórios semanais automáticos, detecção de anomalias em tempo real e eliminação total de erros manuais.</div>
+    </div>
+    <div class="modal-metrics">
+      <div class="modal-metric"><div class="metric-label">Impressões</div><div class="metric-value" style="color:#00c8a0">1.24M</div><div class="metric-delta">↑ 18%</div></div>
+      <div class="modal-metric"><div class="metric-label">CTR médio</div><div class="metric-value">3.1%</div><div class="metric-delta">↑ 0.6 pts</div></div>
+      <div class="modal-metric"><div class="metric-label">CPA</div><div class="metric-value">R$47</div><div class="metric-delta">↓ 12%</div></div>
+      <div class="modal-metric"><div class="metric-label">Horas/sem economizadas</div><div class="metric-value" style="color:#00c8a0">12h</div><div class="metric-delta">automação total</div></div>
+    </div>
+    <div class="modal-charts">
+      <div class="modal-chart-card">
+        <div class="modal-chart-title">CTR % por canal</div>
+        <div class="modal-chart-sub">Google · Meta · Email · Orgânico</div>
+        <div style="position:relative;height:180px"><canvas id="m-mkt-bar"></canvas></div>
+      </div>
+      <div class="modal-chart-card">
+        <div class="modal-chart-title">Distribuição de investimento</div>
+        <div class="modal-chart-sub">Budget % por canal</div>
+        <div class="legend" style="margin-bottom:8px"><div class="legend-item"><div class="legend-dot" style="background:#00c8a0"></div>Google 45%</div><div class="legend-item"><div class="legend-dot" style="background:#0ea5e9"></div>Meta 30%</div><div class="legend-item"><div class="legend-dot" style="background:#f59e0b"></div>Email 15%</div><div class="legend-item"><div class="legend-dot" style="background:#a78bfa"></div>Outros 10%</div></div>
+        <div style="position:relative;height:180px"><canvas id="m-mkt-donut"></canvas></div>
+      </div>
+      <div class="modal-chart-card full">
+        <div class="modal-chart-title">Impressões & Conversões — evolução semanal</div>
+        <div class="modal-chart-sub">Últimas 8 semanas</div>
+        <div class="legend" style="margin-bottom:8px"><div class="legend-item"><div class="legend-dot" style="background:#00c8a0"></div>Impressões (K)</div><div class="legend-item"><div class="legend-dot" style="background:#f59e0b"></div>Conversões</div></div>
+        <div style="position:relative;height:150px"><canvas id="m-mkt-line"></canvas></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+/* HAMBURGER */
+const burger=document.getElementById('burger');
+const drawer=document.getElementById('drawer');
+function closeDrawer(){burger.classList.remove('open');drawer.classList.remove('open');document.body.style.overflow='';}
+burger.addEventListener('click',()=>{
+  const open=drawer.classList.toggle('open');
+  burger.classList.toggle('open',open);
+  document.body.style.overflow=open?'hidden':'';
+});
+
+/* CHARTS CONFIG */
+const gc='rgba(255,255,255,0.05)',tc='#565e75';
+const bOpts=(ex={})=>({responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{ticks:{font:{size:10},color:tc},grid:{color:gc}},x:{ticks:{font:{size:10},color:tc},grid:{color:gc}}},...ex});
+
+/* MAIN PAGE CHARTS */
+new Chart(document.getElementById('lineChart'),{type:'line',data:{labels:['Jan','Fev','Mar','Abr','Mai','Jun'],datasets:[{data:[28,32,29,38,41,39],borderColor:'#00c8a0',backgroundColor:'rgba(0,200,160,0.07)',tension:0.4,pointRadius:3,fill:true},{data:[1.2,1.5,1.35,1.9,2.1,2.0],borderColor:'#0ea5e9',backgroundColor:'rgba(14,165,233,0.07)',tension:0.4,pointRadius:3,borderDash:[5,4],fill:true,yAxisID:'y2'}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{ticks:{font:{size:10},color:tc},grid:{color:gc}},y2:{position:'right',ticks:{font:{size:10},color:'#0ea5e9'},grid:{drawOnChartArea:false}},x:{ticks:{font:{size:10},color:tc},grid:{color:gc}}}}});
+new Chart(document.getElementById('donutChart'),{type:'doughnut',data:{labels:['Google Ads','Meta Ads','Orgânico','Email'],datasets:[{data:[38,27,20,15],backgroundColor:['#00c8a0','#0ea5e9','#a78bfa','#f59e0b'],borderWidth:0,hoverOffset:8}]},options:{responsive:true,maintainAspectRatio:false,cutout:'68%',plugins:{legend:{display:false}}}});
+new Chart(document.getElementById('healthChart'),{type:'bar',data:{labels:['Clínica Geral','Cardiologia','Ortopedia','Pediatria','Ginecologia','Neurologia'],datasets:[{data:[14.2,8.7,6.4,9.1,5.8,4.3],backgroundColor:'rgba(0,166,81,0.75)',borderRadius:4,borderSkipped:false},{data:[12,10,7,8,7,5],backgroundColor:'rgba(0,200,160,0.25)',borderRadius:4,borderSkipped:false,borderColor:'#00c8a0',borderWidth:1}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{ticks:{font:{size:10},color:tc,callback:v=>v+'K'},grid:{color:gc}},x:{ticks:{font:{size:9},color:tc,maxRotation:30,autoSkip:false},grid:{display:false}}}}});
+new Chart(document.getElementById('roiChart'),{type:'bar',data:{labels:['Brand Awareness','Retargeting','Lead Gen','Promo Verão','Lançamento'],datasets:[{data:[4.1,3.8,3.5,2.9,2.4],backgroundColor:['rgba(167,139,250,0.85)','rgba(167,139,250,0.7)','rgba(167,139,250,0.6)','rgba(167,139,250,0.45)','rgba(167,139,250,0.3)'],borderRadius:4,borderSkipped:false}]},options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{font:{size:10},color:tc,callback:v=>v+'×'},grid:{color:gc}},y:{ticks:{font:{size:10},color:tc},grid:{display:false}}}}});
+
+/* SKILL WHEELS */
+const CIRC=276.46;
+document.querySelectorAll('.skill-wheel-card').forEach(card=>{
+  const dotsEl=card.querySelector('.swc-dots');
+  const inner=card.querySelector('.swc-ticker-inner');
+  const arc=card.querySelector('.swc-arc');
+  const color=dotsEl.dataset.color;
+  const count=parseInt(dotsEl.dataset.count);
+  let cur=0;
+  for(let i=0;i<count;i++){const d=document.createElement('div');d.className='swc-dot'+(i===0?' active':'');d.style.background=i===0?color:'rgba(255,255,255,0.15)';dotsEl.appendChild(d);}
+  function go(idx){
+    inner.style.transform=`translateY(-${idx*26}px)`;
+    dotsEl.querySelectorAll('.swc-dot').forEach((d,i)=>{d.classList.toggle('active',i===idx);d.style.background=i===idx?color:'rgba(255,255,255,0.15)';});
+    arc.style.strokeDashoffset=CIRC*(1-(idx+1)/count);
+  }
+  requestAnimationFrame(()=>setTimeout(()=>go(0),400));
+  setInterval(()=>{cur=(cur+1)%count;go(cur);},2400+Math.random()*400);
+});
+
+/* MODALS */
+const mC={};
+function openModal(id){document.getElementById('modal-'+id).classList.add('open');document.body.style.overflow='hidden';setTimeout(()=>buildCharts(id),80);}
+function closeModal(id){document.getElementById('modal-'+id).classList.remove('open');document.body.style.overflow='';}
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){document.querySelectorAll('.modal-overlay.open').forEach(m=>m.classList.remove('open'));document.body.style.overflow='';}});
+function kill(k){if(mC[k]){mC[k].destroy();delete mC[k];}}
+
+function buildCharts(m){
+  if(m==='saude'){
+    kill('sb');kill('sl');kill('sn');
+    mC.sb=new Chart(document.getElementById('m-saude-bar'),{type:'bar',data:{labels:['Clín. Geral','Cardio','Ortoped.','Pediatria','Gineco.','Neuro.'],datasets:[{data:[14.2,8.7,6.4,9.1,5.8,4.3],backgroundColor:'rgba(0,166,81,0.8)',borderRadius:4,borderSkipped:false},{data:[12,10,7,8,7,5],backgroundColor:'rgba(0,200,160,0.25)',borderRadius:4,borderSkipped:false,borderColor:'#00c8a0',borderWidth:1}]},options:{...bOpts(),scales:{y:{ticks:{font:{size:9},color:tc,callback:v=>v+'K'},grid:{color:gc}},x:{ticks:{font:{size:8},color:tc,maxRotation:20,autoSkip:false},grid:{display:false}}}}});
+    mC.sl=new Chart(document.getElementById('m-saude-line'),{type:'line',data:{labels:['Jan','Fev','Mar','Abr','Mai','Jun'],datasets:[{data:[66.1,67.4,68.2,67.8,69.1,68.2],borderColor:'#00a651',backgroundColor:'rgba(0,166,81,0.08)',tension:0.4,fill:true,pointRadius:3},{data:[72,72,72,72,72,72],borderColor:'#f87171',borderDash:[6,3],pointRadius:0,borderWidth:1.5}]},options:{...bOpts(),scales:{y:{min:60,max:80,ticks:{font:{size:9},color:tc,callback:v=>v+'%'},grid:{color:gc}},x:{ticks:{font:{size:9},color:tc},grid:{color:gc}}}}});
+    mC.sn=new Chart(document.getElementById('m-saude-nps'),{type:'line',data:{labels:['Q1 23','Q2 23','Q3 23','Q4 23','Q1 24','Q2 24'],datasets:[{data:[55,58,60,64,68,72],borderColor:'#00a651',tension:0.4,pointRadius:3,fill:false},{data:[48,51,54,57,61,65],borderColor:'#00c8a0',tension:0.4,pointRadius:3,fill:false},{data:[42,45,48,52,55,60],borderColor:'#a78bfa',tension:0.4,pointRadius:3,fill:false},{data:[38,41,45,48,52,58],borderColor:'#f59e0b',tension:0.4,pointRadius:3,fill:false}]},options:{...bOpts()}});
+  }
+  if(m==='vendas'){
+    kill('vl');kill('vf');kill('vd');
+    mC.vl=new Chart(document.getElementById('m-vendas-line'),{type:'line',data:{labels:['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'],datasets:[{data:[180,210,195,240,265,280,null,null,null,null,null,null],borderColor:'#0ea5e9',backgroundColor:'rgba(14,165,233,0.07)',tension:0.4,fill:true,pointRadius:3},{data:[175,205,200,235,260,275,290,310,320,340,360,400],borderColor:'#a78bfa',borderDash:[5,4],tension:0.4,fill:false,pointRadius:2}]},options:{...bOpts(),scales:{y:{ticks:{font:{size:9},color:tc,callback:v=>'R$'+v+'K'},grid:{color:gc}},x:{ticks:{font:{size:8},color:tc},grid:{color:gc}}}}});
+    mC.vf=new Chart(document.getElementById('m-vendas-funil'),{type:'bar',data:{labels:['Leads','Qualificados','Proposta','Negociação','Fechados'],datasets:[{data:[1200,680,340,180,92],backgroundColor:['rgba(14,165,233,0.3)','rgba(14,165,233,0.45)','rgba(14,165,233,0.6)','rgba(14,165,233,0.75)','rgba(14,165,233,0.95)'],borderRadius:4,borderSkipped:false}]},options:{...bOpts()}});
+    mC.vd=new Chart(document.getElementById('m-vendas-donut'),{type:'doughnut',data:{labels:['Enterprise','Mid-market','SMB'],datasets:[{data:[42,31,27],backgroundColor:['#0ea5e9','#a78bfa','#00c8a0'],borderWidth:0,hoverOffset:6}]},options:{responsive:true,maintainAspectRatio:false,cutout:'65%',plugins:{legend:{display:false}}}});
+  }
+  if(m==='rh'){
+    kill('rt');kill('re');kill('ra');
+    mC.rt=new Chart(document.getElementById('m-rh-turnover'),{type:'bar',data:{labels:['Comercial','TI','Operações','RH','Financeiro','Marketing'],datasets:[{data:[18.2,10.4,14.1,6.2,8.8,11.5],backgroundColor:['rgba(167,139,250,0.85)','rgba(167,139,250,0.7)','rgba(167,139,250,0.75)','rgba(167,139,250,0.5)','rgba(167,139,250,0.6)','rgba(167,139,250,0.65)'],borderRadius:4,borderSkipped:false}]},options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{font:{size:9},color:tc,callback:v=>v+'%'},grid:{color:gc}},y:{ticks:{font:{size:9},color:tc},grid:{display:false}}}}});
+    mC.re=new Chart(document.getElementById('m-rh-enps'),{type:'line',data:{labels:['Q1 23','Q2 23','Q3 23','Q4 23','Q1 24','Q2 24'],datasets:[{data:[38,42,46,50,54,58],borderColor:'#a78bfa',backgroundColor:'rgba(167,139,250,0.08)',tension:0.4,fill:true,pointRadius:3},{data:[45,45,45,45,45,45],borderColor:'#565e75',borderDash:[5,4],pointRadius:0,borderWidth:1.5}]},options:{...bOpts(),scales:{y:{min:25,ticks:{font:{size:9},color:tc},grid:{color:gc}},x:{ticks:{font:{size:9},color:tc},grid:{color:gc}}}}});
+    mC.ra=new Chart(document.getElementById('m-rh-abs'),{type:'bar',data:{labels:['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'],datasets:[{data:[3.8,4.1,3.6,3.9,4.4,3.7,4.0,3.8,4.2,3.5,4.1,3.9],backgroundColor:'rgba(86,94,117,0.5)',borderRadius:3,borderSkipped:false},{data:[3.2,3.4,3.0,3.1,3.5,3.1,null,null,null,null,null,null],backgroundColor:'rgba(167,139,250,0.75)',borderRadius:3,borderSkipped:false}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{ticks:{font:{size:9},color:tc,callback:v=>v+'%'},grid:{color:gc}},x:{ticks:{font:{size:8},color:tc},grid:{display:false}}}}});
+  }
+  if(m==='mkt'){
+    kill('mb');kill('md');kill('ml');
+    mC.mb=new Chart(document.getElementById('m-mkt-bar'),{type:'bar',data:{labels:['Google Ads','Meta Ads','Email','Orgânico'],datasets:[{data:[4.2,3.1,2.8,1.9],backgroundColor:['rgba(0,200,160,0.8)','rgba(14,165,233,0.75)','rgba(245,158,11,0.7)','rgba(167,139,250,0.65)'],borderRadius:6,borderSkipped:false}]},options:{...bOpts(),scales:{y:{ticks:{font:{size:9},color:tc,callback:v=>v+'%'},grid:{color:gc}},x:{ticks:{font:{size:9},color:tc},grid:{display:false}}}}});
+    mC.md=new Chart(document.getElementById('m-mkt-donut'),{type:'doughnut',data:{labels:['Google','Meta','Email','Outros'],datasets:[{data:[45,30,15,10],backgroundColor:['#00c8a0','#0ea5e9','#f59e0b','#a78bfa'],borderWidth:0,hoverOffset:6}]},options:{responsive:true,maintainAspectRatio:false,cutout:'65%',plugins:{legend:{display:false}}}});
+    mC.ml=new Chart(document.getElementById('m-mkt-line'),{type:'line',data:{labels:['S1','S2','S3','S4','S5','S6','S7','S8'],datasets:[{data:[148,162,155,178,191,185,204,218],borderColor:'#00c8a0',backgroundColor:'rgba(0,200,160,0.07)',tension:0.4,fill:true,pointRadius:3,yAxisID:'y'},{data:[280,320,295,380,410,390,440,470],borderColor:'#f59e0b',tension:0.4,pointRadius:3,fill:false,borderDash:[4,3],yAxisID:'y2'}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{ticks:{font:{size:9},color:tc,callback:v=>v+'K'},grid:{color:gc}},y2:{position:'right',ticks:{font:{size:9},color:'#f59e0b'},grid:{drawOnChartArea:false}},x:{ticks:{font:{size:9},color:tc},grid:{color:gc}}}}});
+  }
+}
+</script>
+</body>
+</html>
